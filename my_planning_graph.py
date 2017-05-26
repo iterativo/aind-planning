@@ -303,13 +303,25 @@ class PlanningGraph():
         :return:
             adds A nodes to the current level in self.a_levels[level]
         """
-        # TODO add action A level to the planning graph as described in the Russell-Norvig text
         # 1. determine what actions to add and create those PgNode_a objects
         # 2. connect the nodes to the previous S literal level
         # for example, the A0 level will iterate through all possible actions for the problem and add a PgNode_a to a_levels[0]
         #   set iff all prerequisite literals for the action hold in S0.  This can be accomplished by testing
         #   to see if a proposed PgNode_a has prenodes that are a subset of the previous S level.  Once an
         #   action node is added, it MUST be connected to the S node instances in the appropriate s_level set.
+
+        # 1. determine what actions to add and create those PgNode_a objects
+        a_nodes = []
+        for action in self.all_actions:
+            node_a = PgNode_a(action)
+            if node_a.prenodes.issubset(self.s_levels[level]):
+                a_nodes.append(node_a)
+                # 2. connect the nodes to the previous S literal level
+                # connect parents/children nodes
+                for node_s in self.s_levels[level]:
+                    node_s.children.add(node_a)
+                    node_a.parents.add(node_s)
+        self.a_levels.append(a_nodes)
 
     def add_literal_level(self, level):
         """ add an S (literal) level to the Planning Graph
@@ -320,7 +332,6 @@ class PlanningGraph():
         :return:
             adds S nodes to the current level in self.s_levels[level]
         """
-        # TODO add literal S level to the planning graph as described in the Russell-Norvig text
         # 1. determine what literals to add
         # 2. connect the nodes
         # for example, every A node in the previous level has a list of S nodes in effnodes that represent the effect
@@ -328,6 +339,17 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
+        
+        # 1. determine what literals to add
+        s_nodes = set()
+        for node_a in self.a_levels[level - 1]:
+            for node_s in node_a.effnodes:
+                # 2. connect the nodes
+                # connect parents/children nodes
+                s_nodes.add(node_s)
+                node_s.parents.add(node_a)
+                node_a.children.add(node_s)
+        self.s_levels.append(s_nodes)
 
     def update_a_mutex(self, nodeset):
         """ Determine and update sibling mutual exclusion for A-level nodes
@@ -478,7 +500,19 @@ class PlanningGraph():
 
         :return: int
         """
+
+        # https://discussions.udacity.com/t/understand-level-sum-heuristic/225706/5
+
         level_sum = 0
-        # TODO implement
         # for each goal in the problem, determine the level cost, then add them together
+        for goal in self.problem.goal:
+            goal_met = False
+            for level, states in enumerate(self.s_levels):
+                for state in states:
+                    if state.is_pos and goal == state.symbol:
+                        goal_met = True
+                        level_sum += level
+                        break
+                if goal_met:
+                    break
         return level_sum

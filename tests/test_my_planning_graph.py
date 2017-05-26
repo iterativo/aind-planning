@@ -18,6 +18,7 @@ class TestPlanningGraphLevels(unittest.TestCase):
         self.pg = PlanningGraph(self.p, self.p.initial)
 
     def test_add_action_level(self):
+        # print(self.pg.a_levels)
         # for level, nodeset in enumerate(self.pg.a_levels):
         #     for node in nodeset:
         #         print("Level {}: {}{})".format(level, node.action.name, node.action.args))
@@ -27,7 +28,8 @@ class TestPlanningGraphLevels(unittest.TestCase):
     def test_add_literal_level(self):
         # for level, nodeset in enumerate(self.pg.s_levels):
         #     for node in nodeset:
-        #         print("Level {}: {})".format(level, node.literal))
+        #         print(node)
+        #         print("Level {}: {}".format(level, node.symbol))
         self.assertEqual(len(self.pg.s_levels[0]), 2, len(self.pg.s_levels[0]))
         self.assertEqual(len(self.pg.s_levels[1]), 4, len(self.pg.s_levels[1]))
         self.assertEqual(len(self.pg.s_levels[2]), 4, len(self.pg.s_levels[2]))

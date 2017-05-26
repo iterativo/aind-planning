@@ -3,6 +3,8 @@ from aimacode.search import Problem
 from aimacode.utils import expr
 from lp_utils import decode_state
 
+import itertools
+
 
 class PgNode():
     """Base class for planning graph nodes.
@@ -438,7 +440,10 @@ class PlanningGraph():
         :return: bool
         """
 
-        # TODO test for Competing Needs between nodes
+        for pa1, pa2 in itertools.product(node_a1.parents, node_a2.parents):
+            if pa1.is_mutex(pa2):
+                return True
+
         return False
 
     def update_s_mutex(self, nodeset: set):

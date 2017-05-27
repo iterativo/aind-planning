@@ -201,9 +201,18 @@ class AirCargoProblem(Problem):
         conditions by ignoring the preconditions required for an action to be
         executed.
         """
-        # TODO implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
-        count = 0
-        return count
+
+        # See this post for logic info
+        # https://discussions.udacity.com/t/understanding-ignore-precondition-heuristic/225906
+
+        # Leverage propositional knowledge base
+        kb = PropKB()
+        kb.tell(decode_state(node.state, self.state_map).pos_sentence())
+
+        # At this point, kb.clauses contains the positive clauses, so all is
+        # needed is to see which clauses in "goal" are not in "clauses".
+        unreached_goals = set(self.goal) - set(kb.clauses)
+        return len(unreached_goals)
 
 
 def air_cargo_p1() -> AirCargoProblem:
